@@ -1,0 +1,43 @@
+PODS:
+  - Alamofire (5.11.2)
+  - MapboxCommon (23.12.0)
+  - MapboxCoreMaps (10.19.2):
+    - MapboxCommon (~> 23.11)
+  - MapboxMaps (10.19.5):
+    - MapboxCommon (= 23.12.0)
+    - MapboxCoreMaps (= 10.19.2)
+    - MapboxMobileEvents (= 2.0.0)
+    - Turf (= 2.8.0)
+  - MapboxMobileEvents (2.0.0)
+  - Moya (15.0.0):
+    - Moya/Core (= 15.0.0)
+  - Moya/Core (15.0.0):
+    - Alamofire (~> 5.0)
+  - Turf (2.8.0)
+
+DEPENDENCIES:
+  - MapboxMaps (~> 10.18)
+  - Moya (~> 15.0)
+
+SPEC REPOS:
+  trunk:
+    - Alamofire
+    - MapboxCommon
+    - MapboxCoreMaps
+    - MapboxMaps
+    - MapboxMobileEvents
+    - Moya
+    - Turf
+
+SPEC CHECKSUMS:
+  Alamofire: 400275dd1c6d87d95a041861d2a59da4b520a203
+  MapboxCommon: 9fe257ddc7385d55106345d4520a7fec3f4c0465
+  MapboxCoreMaps: 35685edba03e44468aed57c3dfd7f8795edafda8
+  MapboxMaps: f8d239f0474c07002443dd2f424c6dba2d44ec9a
+  MapboxMobileEvents: d044b9edbe0ec7df60f6c2c9634fe9a7f449266b
+  Moya: 138f0573e53411fb3dc17016add0b748dfbd78ee
+  Turf: aa2ede4298009639d10db36aba1a7ebaad072a5e
+
+PODFILE CHECKSUM: 9794f32aa8594fe867d57ddfab71aef9c277d43c
+
+COCOAPODS: 1.16.2

@@ -1,0 +1,12 @@
+# 忽略本地敏感配置
+MapVista/Config/Secrets.xcconfig
+Secrets.xcconfig
+
+# Xcode
+DerivedData/
+build/
+*.xcworkspace
+xcuserdata/
+
+# macOS
+.DS_Store
