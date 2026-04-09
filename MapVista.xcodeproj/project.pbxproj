@@ -9,18 +9,16 @@
 /* Begin PBXBuildFile section */
 		815B3EF524E6A6E880422DE8 /* Pods_MapVista.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 466E54F1B53700F5BA50B1E3 /* Pods_MapVista.framework */; };
 		EED518442F87A57700D83232 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = EED518432F87A57700D83232 /* .gitignore */; };
-		EED518462F87A90500D83232 /* Secrets.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = EED518452F87A90500D83232 /* Secrets.xcconfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		EED518472F87B00000D83232 /* App.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.debug.xcconfig; sourceTree = SOURCE_ROOT; };
-		EED518482F87B00000D83232 /* App.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.release.xcconfig; sourceTree = SOURCE_ROOT; };
 		466E54F1B53700F5BA50B1E3 /* Pods_MapVista.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapVista.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74AA17C8F32404BF14AFE9A9 /* Pods-MapVista.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapVista.debug.xcconfig"; path = "Target Support Files/Pods-MapVista/Pods-MapVista.debug.xcconfig"; sourceTree = "<group>"; };
 		CAC15252D7F426C0A22240F3 /* Pods-MapVista.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapVista.release.xcconfig"; path = "Target Support Files/Pods-MapVista/Pods-MapVista.release.xcconfig"; sourceTree = "<group>"; };
 		EEABE0412F84DA62008DE0DC /* MapVista.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapVista.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EED518432F87A57700D83232 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		EED518452F87A90500D83232 /* Secrets.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Secrets.xcconfig; sourceTree = "<group>"; };
+		EED518472F87B00000D83232 /* App.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		EED518482F87B00000D83232 /* App.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.release.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -77,11 +75,11 @@
 			isa = PBXGroup;
 			children = (
 				EED518432F87A57700D83232 /* .gitignore */,
-				EED518452F87A90500D83232 /* Secrets.xcconfig */,
 				EEABE0432F84DA62008DE0DC /* MapVista */,
 				EE56211E2F86716300EAAF5B /* Frameworks */,
 				EEABE0422F84DA62008DE0DC /* Products */,
 				237758E1272A83C577DDA999 /* Pods */,
+				EED5184E2F87AC6700D83232 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -91,6 +89,15 @@
 				EEABE0412F84DA62008DE0DC /* MapVista.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		EED5184E2F87AC6700D83232 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				EED518472F87B00000D83232 /* App.debug.xcconfig */,
+				EED518482F87B00000D83232 /* App.release.xcconfig */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -158,7 +165,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				EED518442F87A57700D83232 /* .gitignore in Resources */,
-				EED518462F87A90500D83232 /* Secrets.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,13 +201,9 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MapVista/Pods-MapVista-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MapVista/Pods-MapVista-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
