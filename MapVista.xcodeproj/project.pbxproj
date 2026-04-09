@@ -13,6 +13,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		EED518472F87B00000D83232 /* App.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		EED518482F87B00000D83232 /* App.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.release.xcconfig; sourceTree = SOURCE_ROOT; };
 		466E54F1B53700F5BA50B1E3 /* Pods_MapVista.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_MapVista.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		74AA17C8F32404BF14AFE9A9 /* Pods-MapVista.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapVista.debug.xcconfig"; path = "Target Support Files/Pods-MapVista/Pods-MapVista.debug.xcconfig"; sourceTree = "<group>"; };
 		CAC15252D7F426C0A22240F3 /* Pods-MapVista.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapVista.release.xcconfig"; path = "Target Support Files/Pods-MapVista/Pods-MapVista.release.xcconfig"; sourceTree = "<group>"; };
@@ -342,7 +344,7 @@
 		};
 		EEABE04D2F84DA64008DE0DC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 74AA17C8F32404BF14AFE9A9 /* Pods-MapVista.debug.xcconfig */;
+			baseConfigurationReference = EED518472F87B00000D83232 /* App.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -382,7 +384,7 @@
 		};
 		EEABE04E2F84DA64008DE0DC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = CAC15252D7F426C0A22240F3 /* Pods-MapVista.release.xcconfig */;
+			baseConfigurationReference = EED518482F87B00000D83232 /* App.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
