@@ -42,7 +42,7 @@ final class LocationManager: NSObject, LocationManaging {
     private let maximumAcceptedHorizontalAccuracy: CLLocationAccuracy = 100
 
     override init() {
-        authorizationStatus = CLLocationManager.authorizationStatus()
+        authorizationStatus = locationManager.authorizationStatus
         super.init()
         locationManager.delegate = self
         locationManager.desiredAccuracy = kCLLocationAccuracyBestForNavigation
@@ -96,7 +96,7 @@ final class LocationManager: NSObject, LocationManaging {
     }
 
     private func refreshAuthorizationState() {
-        authorizationStatus = CLLocationManager.authorizationStatus()
+        authorizationStatus = locationManager.authorizationStatus
         switch authorizationStatus {
         case .authorizedAlways, .authorizedWhenInUse:
             locationState = .authorized

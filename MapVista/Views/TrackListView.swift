@@ -21,23 +21,25 @@ struct TrackListView: View {
                     
             } else {
                 ForEach(trackService.historyRecords) { record in
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(record.name)
-                            .font(.headline)
-                        
-                        HStack {
-                            Label("\(String(format: "%.2f", record.totalDistance / 1000)) km", systemImage: "figure.walk")
-                            Spacer()
-                            Label(formatDuration(record.totalDuration), systemImage: "clock")
+                    NavigationLink(destination: TrackDetailView(record: record)) {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text(record.name)
+                                .font(.headline)
+                            
+                            HStack {
+                                Label("\(String(format: "%.2f", record.totalDistance / 1000)) km", systemImage: "figure.walk")
+                                Spacer()
+                                Label(formatDuration(record.totalDuration), systemImage: "clock")
+                            }
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                            
+                            Text(dateFormatter.string(from: record.startTime))
+                                .font(.caption2)
+                                .foregroundColor(.gray)
                         }
-                        .font(.subheadline)
-                        .foregroundColor(.secondary)
-                        
-                        Text(dateFormatter.string(from: record.startTime))
-                            .font(.caption2)
-                            .foregroundColor(.gray)
+                        .padding(.vertical, 4)
                     }
-                    .padding(.vertical, 4)
                     .swipeActions(edge: .trailing, allowsFullSwipe: false) {
                         Button {
                             if let url = trackService.generateGPX(for: record) {
