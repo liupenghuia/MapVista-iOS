@@ -21,6 +21,7 @@ final class MapViewModel: ObservableObject {
     @Published var isLoadingPOIs = false
     @Published var errorMessage: String?
     @Published private(set) var locationRecenterToken = 0
+    @Published var importedTrackDocument: GPXTrackDocument?
     
     // 轨迹记录相关状态
     @Published var isRecordingTrack = false
@@ -104,6 +105,18 @@ final class MapViewModel: ObservableObject {
             .store(in: &cancellables)
     }
 
+    var trackOverlayCoordinates: [CLLocationCoordinate2D] {
+        if isRecordingTrack {
+            return currentTrackPoints
+        }
+        return importedTrackDocument?.coordinates ?? []
+    }
+
+    var importedTrackSummaryText: String? {
+        guard let importedTrackDocument else { return nil }
+        return "\(importedTrackDocument.pointCount) 个点 · \(importedTrackDocument.distanceText) · \(importedTrackDocument.durationText)"
+    }
+
     private func loadInitialData() {
         isLoadingPOIs = true
         if let cachedStyle = cacheService.cachedSelectedStyle() {
@@ -151,6 +164,31 @@ final class MapViewModel: ObservableObject {
         routeInfo = nil
     }
 
+    func showImportedTrack(_ document: GPXTrackDocument) {
+        importedTrackDocument = document
+        selectedPOI = nil
+        routeCoordinates = []
+        routeInfo = nil
+
+        if let center = centerCoordinate(for: document.coordinates) {
+            cameraState = MapCameraState(
+                latitude: center.latitude,
+                longitude: center.longitude,
+                zoom: zoomLevel(for: document.coordinates),
+                bearing: 0,
+                pitch: sceneMode.cameraPitch
+            )
+        }
+    }
+
+    func clearImportedTrack() {
+        importedTrackDocument = nil
+
+        if selectedPOI == nil, let currentLocation {
+            centerCamera(on: currentLocation)
+        }
+    }
+
     func applyCategoryFilter(_ category: POICategory?) {
         selectedCategory = category
     }
@@ -191,6 +229,48 @@ final class MapViewModel: ObservableObject {
             bearing: 0,
             pitch: sceneMode.cameraPitch
         )
+    }
+
+    private func centerCoordinate(for coordinates: [CLLocationCoordinate2D]) -> CLLocationCoordinate2D? {
+        guard !coordinates.isEmpty else { return nil }
+
+        let latitudes = coordinates.map(\.latitude)
+        let longitudes = coordinates.map(\.longitude)
+
+        let minLat = latitudes.min() ?? 0
+        let maxLat = latitudes.max() ?? 0
+        let minLon = longitudes.min() ?? 0
+        let maxLon = longitudes.max() ?? 0
+
+        return CLLocationCoordinate2D(
+            latitude: (minLat + maxLat) / 2.0,
+            longitude: (minLon + maxLon) / 2.0
+        )
+    }
+
+    private func zoomLevel(for coordinates: [CLLocationCoordinate2D]) -> Double {
+        guard coordinates.count > 1 else { return 14.0 }
+
+        let latitudes = coordinates.map(\.latitude)
+        let longitudes = coordinates.map(\.longitude)
+        let latSpan = (latitudes.max() ?? 0) - (latitudes.min() ?? 0)
+        let lonSpan = (longitudes.max() ?? 0) - (longitudes.min() ?? 0)
+        let span = max(latSpan, lonSpan)
+
+        switch span {
+        case ..<0.005:
+            return 15.0
+        case ..<0.02:
+            return 14.0
+        case ..<0.08:
+            return 12.5
+        case ..<0.25:
+            return 11.0
+        case ..<1.0:
+            return 9.5
+        default:
+            return 8.0
+        }
     }
 
     private var useMetricSystem: Bool {

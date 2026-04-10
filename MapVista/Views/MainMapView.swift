@@ -3,21 +3,29 @@
 
 import SwiftUI
 import CoreLocation
+import Combine
 
 struct BookmarkCoordinateWrapper: Identifiable {
     let id = UUID()
     let coordinate: CLLocationCoordinate2D
 }
 
+private struct GPXImportAlertItem: Identifiable {
+    let id = UUID()
+    let message: String
+}
+
 struct MainMapView: View {
     @ObservedObject var mapViewModel: MapViewModel
     @ObservedObject var searchViewModel: SearchViewModel
+    @ObservedObject var gpxImportStore: GPXImportStore
 
     @State private var showSearchSheet = false
     @State private var showDetailSheet = false
     @State private var showStylePanel = false
     @State private var isImmersiveMode = false // 新增沉浸模式状态
     @State private var bookmarkWrapper: BookmarkCoordinateWrapper?
+    @State private var importAlertItem: GPXImportAlertItem?
 
     var body: some View {
         ZStack(alignment: .top) {
@@ -31,6 +39,10 @@ struct MainMapView: View {
                         LocationPermissionBanner.openSettings()
                     })
                     .padding(.top, 2)
+                }
+                if let importedTrack = mapViewModel.importedTrackDocument, !mapViewModel.isRecordingTrack {
+                    importedTrackBanner(document: importedTrack)
+                        .padding(.top, 2)
                 }
                 Spacer()
             }
@@ -182,8 +194,26 @@ struct MainMapView: View {
                 }
             )
         }
+        .alert(item: $importAlertItem) { item in
+            Alert(
+                title: Text("GPX 导入失败"),
+                message: Text(item.message),
+                dismissButton: .default(Text("知道了"))
+            )
+        }
         .onAppear {
             searchViewModel.performSearch(keyword: searchViewModel.searchText)
+            syncImportedTrack()
+        }
+        .onReceive(gpxImportStore.$importedTrackDocument) { document in
+            if let document {
+                mapViewModel.showImportedTrack(document)
+            } else {
+                mapViewModel.clearImportedTrack()
+            }
+        }
+        .onReceive(gpxImportStore.$importErrorMessage.compactMap { $0 }) { message in
+            importAlertItem = GPXImportAlertItem(message: message)
         }
         .background(Color.mapCanvasBackground.ignoresSafeArea())
     }
@@ -197,7 +227,7 @@ struct MainMapView: View {
             pois: mapViewModel.visiblePOIs,
             selectedPOI: mapViewModel.selectedPOI,
             routeCoordinates: mapViewModel.routeCoordinates,
-            currentTrackPoints: mapViewModel.currentTrackPoints,
+            currentTrackPoints: mapViewModel.trackOverlayCoordinates,
             currentLocation: mapViewModel.currentLocation,
             onPOITap: { poi in
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
@@ -223,6 +253,12 @@ struct MainMapView: View {
         .background(Color.mapCanvasBackground)
         .clipped()
         .ignoresSafeArea()
+    }
+
+    private func syncImportedTrack() {
+        if let document = gpxImportStore.importedTrackDocument {
+            mapViewModel.showImportedTrack(document)
+        }
     }
 
 
@@ -307,6 +343,83 @@ struct MainMapView: View {
                 mapViewModel.moveToCurrentLocation()
             }
         }
+    }
+
+    private func importedTrackBanner(document: GPXTrackDocument) -> some View {
+        HStack(alignment: .top, spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 16, style: .continuous)
+                    .fill(Color.systemTeal.opacity(0.12))
+                    .frame(width: 44, height: 44)
+
+                Image(systemName: "doc.text.magnifyingglass")
+                    .font(.system(size: 18, weight: .semibold))
+                    .foregroundColor(.systemTeal)
+            }
+
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(alignment: .firstTextBaseline, spacing: 8) {
+                    Text("已导入 GPX 轨迹")
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(.systemTeal)
+                        .textCase(.uppercase)
+
+                    Spacer(minLength: 0)
+
+                    Button(action: {
+                        gpxImportStore.clearImportedTrack()
+                    }) {
+                        Image(systemName: "xmark")
+                            .font(.system(size: 11, weight: .bold))
+                            .foregroundColor(.secondary)
+                            .frame(width: 22, height: 22)
+                            .background(Color.black.opacity(0.06))
+                            .clipShape(Circle())
+                    }
+                }
+
+                Text(document.name)
+                    .font(.system(size: 17, weight: .semibold))
+                    .foregroundColor(.primary)
+                    .lineLimit(2)
+                    .multilineTextAlignment(.leading)
+
+                HStack(spacing: 8) {
+                    trackInfoChip(title: "点数", value: "\(document.pointCount)", tint: .systemTeal)
+                    trackInfoChip(title: "距离", value: document.distanceText, tint: .systemBlue)
+                    trackInfoChip(title: "时长", value: document.durationText, tint: .systemOrange)
+                }
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 14)
+        .background(
+            RoundedRectangle(cornerRadius: 18, style: .continuous)
+                .fill(.ultraThinMaterial)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 18, style: .continuous)
+                        .stroke(Color.white.opacity(0.65), lineWidth: 1)
+                )
+                .shadow(color: Color.black.opacity(0.12), radius: 12, x: 0, y: 5)
+        )
+        .padding(.horizontal, 16)
+    }
+
+    private func trackInfoChip(title: String, value: String, tint: Color) -> some View {
+        HStack(spacing: 5) {
+            Text(title)
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(.secondary)
+            Text(value)
+                .font(.system(size: 11, weight: .bold))
+                .foregroundColor(tint)
+        }
+        .padding(.horizontal, 10)
+        .padding(.vertical, 7)
+        .background(
+            Capsule(style: .continuous)
+                .fill(tint.opacity(0.10))
+        )
     }
 
 }

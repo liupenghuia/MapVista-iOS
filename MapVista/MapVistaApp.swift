@@ -5,7 +5,9 @@ import SwiftUI
 
 @main
 struct MapVistaApp: App {
+    @UIApplicationDelegateAdaptor(MapVistaAppDelegate.self) private var appDelegate
     private let container = AppContainer()
+    private let gpxImportStore = GPXImportStore.shared
 
     init() {
         MapVistaAppBootstrap.configure()
@@ -15,8 +17,12 @@ struct MapVistaApp: App {
         WindowGroup {
             AppRootView(
                 mapViewModel: container.mapViewModel,
-                searchViewModel: container.searchViewModel
+                searchViewModel: container.searchViewModel,
+                gpxImportStore: gpxImportStore
             )
+            .onOpenURL { url in
+                gpxImportStore.importGPX(from: url)
+            }
         }
     }
 }

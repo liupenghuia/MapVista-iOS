@@ -6,6 +6,7 @@ import SwiftUI
 struct AppRootView: View {
     @ObservedObject var mapViewModel: MapViewModel
     @ObservedObject var searchViewModel: SearchViewModel
+    @ObservedObject var gpxImportStore: GPXImportStore
     
     @StateObject private var authService = AuthService.shared
     @State private var showSplash = true
@@ -15,7 +16,8 @@ struct AppRootView: View {
             if authService.isAuthenticated {
                 RootTabView(
                     mapViewModel: mapViewModel,
-                    searchViewModel: searchViewModel
+                    searchViewModel: searchViewModel,
+                    gpxImportStore: gpxImportStore
                 )
                 .opacity(showSplash ? 0 : 1)
             } else {

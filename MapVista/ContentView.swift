@@ -5,11 +5,13 @@ import SwiftUI
 
 struct ContentView: View {
     private let container = AppContainer()
+    private let gpxImportStore = GPXImportStore.shared
 
     var body: some View {
         AppRootView(
             mapViewModel: container.mapViewModel,
-            searchViewModel: container.searchViewModel
+            searchViewModel: container.searchViewModel,
+            gpxImportStore: gpxImportStore
         )
     }
 }
