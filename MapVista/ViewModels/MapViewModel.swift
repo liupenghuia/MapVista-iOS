@@ -10,6 +10,7 @@ import MapKit
 final class MapViewModel: ObservableObject {
     @Published private(set) var allPOIs: [POIModel] = []
     @Published private(set) var visiblePOIs: [POIModel] = []
+    @Published private(set) var currentLocation: CLLocation?
     @Published var selectedPOI: POIModel?
     @Published var cameraState: MapCameraState = .defaultState
     @Published var selectedStyle: MapStyle = .satellite
@@ -19,6 +20,7 @@ final class MapViewModel: ObservableObject {
     @Published var routeInfo: RouteModel?
     @Published var isLoadingPOIs = false
     @Published var errorMessage: String?
+    @Published private(set) var locationRecenterToken = 0
     
     // 轨迹记录相关状态
     @Published var isRecordingTrack = false
@@ -32,6 +34,7 @@ final class MapViewModel: ObservableObject {
     private let navigationService: NavigationServiceProtocol
     private let cacheService: OfflineCacheProviding
     private var cancellables = Set<AnyCancellable>()
+    private var hasAutoCenteredOnCurrentLocation = false
 
     init(
         poiService: POIServiceProtocol = LocalMockPOIService(),
@@ -56,9 +59,13 @@ final class MapViewModel: ObservableObject {
         locationManager.$currentLocation
             .compactMap { $0 }
             .sink { [weak self] location in
-                self?.recalculateRouteIfNeeded()
+                guard let self else { return }
+                self.currentLocation = location
+                self.recalculateRouteIfNeeded()
                 // 不断将定位点喂给轨迹记录大管家
-                self?.trackService.feedLocation(location)
+                self.trackService.feedLocation(location)
+
+                self.autoCenterOnCurrentLocationIfNeeded(with: location)
             }
             .store(in: &cancellables)
             
@@ -158,15 +165,28 @@ final class MapViewModel: ObservableObject {
     }
 
     func moveToCurrentLocation() {
-        guard let currentLocation = locationManager.currentLocation else {
-            locationManager.requestAuthorizationIfNeeded()
-            locationManager.startUpdatingLocation()
-            return
+        locationRecenterToken += 1
+
+        if let currentLocation = currentLocation {
+            centerCamera(on: currentLocation)
         }
 
+        locationManager.requestFreshLocation()
+    }
+
+    private func autoCenterOnCurrentLocationIfNeeded(with location: CLLocation) {
+        guard !hasAutoCenteredOnCurrentLocation else { return }
+        guard selectedPOI == nil else { return }
+
+        hasAutoCenteredOnCurrentLocation = true
+        locationRecenterToken += 1
+        centerCamera(on: location)
+    }
+
+    private func centerCamera(on location: CLLocation) {
         cameraState = MapCameraState(
-            latitude: currentLocation.coordinate.latitude,
-            longitude: currentLocation.coordinate.longitude,
+            latitude: location.coordinate.latitude,
+            longitude: location.coordinate.longitude,
             zoom: 14.5,
             bearing: 0,
             pitch: sceneMode.cameraPitch

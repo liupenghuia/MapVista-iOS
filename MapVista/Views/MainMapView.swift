@@ -191,13 +191,14 @@ struct MainMapView: View {
     private var mapLayer: some View {
         MapboxMapView(
             cameraState: $mapViewModel.cameraState,
+            locationRecenterToken: mapViewModel.locationRecenterToken,
             selectedStyle: $mapViewModel.selectedStyle,
             sceneMode: $mapViewModel.sceneMode,
             pois: mapViewModel.visiblePOIs,
             selectedPOI: mapViewModel.selectedPOI,
             routeCoordinates: mapViewModel.routeCoordinates,
             currentTrackPoints: mapViewModel.currentTrackPoints,
-            currentLocation: mapViewModel.locationManager.currentLocation,
+            currentLocation: mapViewModel.currentLocation,
             onPOITap: { poi in
                 withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
                     mapViewModel.selectPOI(poi)

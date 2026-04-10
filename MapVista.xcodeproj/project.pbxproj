@@ -17,8 +17,8 @@
 		CAC15252D7F426C0A22240F3 /* Pods-MapVista.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-MapVista.release.xcconfig"; path = "Target Support Files/Pods-MapVista/Pods-MapVista.release.xcconfig"; sourceTree = "<group>"; };
 		EEABE0412F84DA62008DE0DC /* MapVista.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MapVista.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		EED518432F87A57700D83232 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		EED518472F87B00000D83232 /* App.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.debug.xcconfig; sourceTree = SOURCE_ROOT; };
-		EED518482F87B00000D83232 /* App.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.release.xcconfig; sourceTree = SOURCE_ROOT; };
+		EED518472F87B00000D83232 /* MapVista/Config/App.debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.debug.xcconfig; sourceTree = SOURCE_ROOT; };
+		EED518482F87B00000D83232 /* MapVista/Config/App.release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = MapVista/Config/App.release.xcconfig; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -94,8 +94,8 @@
 		EED5184E2F87AC6700D83232 /* Recovered References */ = {
 			isa = PBXGroup;
 			children = (
-				EED518472F87B00000D83232 /* App.debug.xcconfig */,
-				EED518482F87B00000D83232 /* App.release.xcconfig */,
+				EED518472F87B00000D83232 /* MapVista/Config/App.debug.xcconfig */,
+				EED518482F87B00000D83232 /* MapVista/Config/App.release.xcconfig */,
 			);
 			name = "Recovered References";
 			sourceTree = "<group>";
@@ -201,9 +201,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MapVista/Pods-MapVista-frameworks-${CONFIGURATION}-input-files.xcfilelist",
 			);
+			inputPaths = (
+			);
 			name = "[CP] Embed Pods Frameworks";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-MapVista/Pods-MapVista-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			outputPaths = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
@@ -346,7 +350,7 @@
 		};
 		EEABE04D2F84DA64008DE0DC /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EED518472F87B00000D83232 /* App.debug.xcconfig */;
+			baseConfigurationReference = EED518472F87B00000D83232 /* MapVista/Config/App.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -386,7 +390,7 @@
 		};
 		EEABE04E2F84DA64008DE0DC /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = EED518482F87B00000D83232 /* App.release.xcconfig */;
+			baseConfigurationReference = EED518482F87B00000D83232 /* MapVista/Config/App.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

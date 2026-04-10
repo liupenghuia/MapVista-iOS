@@ -25,6 +25,7 @@ protocol LocationManaging: AnyObject, ObservableObject {
 
     func requestAuthorizationIfNeeded()
     func startUpdatingLocation()
+    func requestFreshLocation()
     func stopUpdatingLocation()
     func distance(to coordinate: CLLocationCoordinate2D) -> Double?
 }
@@ -37,6 +38,8 @@ final class LocationManager: NSObject, LocationManaging {
     @Published private(set) var lastErrorMessage: String?
 
     private let locationManager = CLLocationManager()
+    private let maximumAcceptedLocationAge: TimeInterval = 5 * 60
+    private let maximumAcceptedHorizontalAccuracy: CLLocationAccuracy = 100
 
     override init() {
         authorizationStatus = CLLocationManager.authorizationStatus()
@@ -65,6 +68,17 @@ final class LocationManager: NSObject, LocationManaging {
         }
         locationState = .authorized
         locationManager.startUpdatingLocation()
+    }
+
+    func requestFreshLocation() {
+        guard isAuthorized else {
+            requestAuthorizationIfNeeded()
+            startUpdatingLocation()
+            return
+        }
+
+        locationState = .authorized
+        locationManager.requestLocation()
     }
 
     func stopUpdatingLocation() {
@@ -101,8 +115,12 @@ final class LocationManager: NSObject, LocationManaging {
 // MARK: - CLLocationManagerDelegate
 extension LocationManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let latest = locations.last else { return }
-        guard latest.horizontalAccuracy >= 0 else { return }
+        guard let latest = locations.last(where: { location in
+            guard location.horizontalAccuracy >= 0 else { return false }
+            guard location.horizontalAccuracy <= maximumAcceptedHorizontalAccuracy else { return false }
+            let age = -location.timestamp.timeIntervalSinceNow
+            return age >= 0 && age <= maximumAcceptedLocationAge
+        }) else { return }
 
         DispatchQueue.main.async {
             self.currentLocation = latest

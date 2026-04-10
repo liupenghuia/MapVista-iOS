@@ -36,6 +36,7 @@ private final class MapContainerView: UIView {
 
 struct MapboxMapView: UIViewRepresentable {
     @Binding var cameraState: MapCameraState
+    let locationRecenterToken: Int
     @Binding var selectedStyle: MapStyle
     @Binding var sceneMode: MapSceneMode
 
@@ -103,13 +104,17 @@ struct MapboxMapView: UIViewRepresentable {
         private let terrainSourceID = "mapvista-terrain-source"
         private let hillshadeLayerID = "mapvista-hillshade-layer"
         private let skyLayerID = "mapvista-sky-layer"
+        private let currentLocationAnnotationManagerID = "mapvista-current-location"
         private var cancellables: [Cancelable] = []
         private var pointAnnotationManager: PointAnnotationManager?
+        private var currentLocationAnnotationManager: CircleAnnotationManager?
         private var longPressGesture: UILongPressGestureRecognizer?
         private var lastAppliedCameraState: MapCameraState?
         private var lastAppliedStyleRawValue: String?
         private var lastAppliedSceneMode: MapSceneMode?
+        private var lastHandledLocationRecenterToken: Int = 0
         private var lastPOITapTime: Date = .distantPast
+        private var hasCenteredOnInitialLocation = false
 
         init(parent: MapboxMapView) {
             self.parent = parent
@@ -135,9 +140,12 @@ struct MapboxMapView: UIViewRepresentable {
                 return
             }
 
+            applyLocationRecenterIfNeeded(on: mapView)
+            applyInitialLocationIfNeeded(on: mapView)
             applyCameraIfNeeded(on: mapView)
             applySceneModeIfNeeded(on: mapView)
             refreshAnnotations()
+            refreshCurrentLocationAnnotation()
             refreshRoute()
             refreshTrack()
         }
@@ -190,8 +198,12 @@ struct MapboxMapView: UIViewRepresentable {
             routeOverlayManager.install(on: mapView)
             trackOverlayManager.install(on: mapView)
             rebuildPointAnnotationManager()
+            rebuildCurrentLocationAnnotationManager()
+            applyLocationRecenterIfNeeded(on: mapView)
+            applyInitialLocationIfNeeded(on: mapView)
             applyCameraIfNeeded(on: mapView)
             refreshAnnotations()
+            refreshCurrentLocationAnnotation()
             refreshRoute()
             refreshTrack()
         }
@@ -201,6 +213,14 @@ struct MapboxMapView: UIViewRepresentable {
             let manager = mapView.annotations.makePointAnnotationManager()
             manager.delegate = self
             pointAnnotationManager = manager
+        }
+
+        private func rebuildCurrentLocationAnnotationManager() {
+            guard let mapView = mapView else { return }
+            let manager = mapView.annotations.makeCircleAnnotationManager(id: currentLocationAnnotationManagerID)
+            manager.circlePitchAlignment = .map
+            manager.circlePitchScale = .viewport
+            currentLocationAnnotationManager = manager
         }
 
         private func applyCameraIfNeeded(on mapView: MapView) {
@@ -219,6 +239,65 @@ struct MapboxMapView: UIViewRepresentable {
                 mapView.camera.fly(to: cameraOptions, duration: 1.2)
             }
             lastAppliedCameraState = parent.cameraState
+        }
+
+        private func applyLocationRecenterIfNeeded(on mapView: MapView) {
+            guard lastHandledLocationRecenterToken != parent.locationRecenterToken else { return }
+            guard let currentLocation = parent.currentLocation else { return }
+
+            let targetCameraState = MapCameraState(
+                latitude: currentLocation.coordinate.latitude,
+                longitude: currentLocation.coordinate.longitude,
+                zoom: 14.5,
+                bearing: 0,
+                pitch: parent.sceneMode.cameraPitch
+            )
+
+            let cameraOptions = CameraOptions(
+                center: targetCameraState.centerCoordinate,
+                zoom: targetCameraState.zoom,
+                bearing: targetCameraState.bearing,
+                pitch: targetCameraState.pitch
+            )
+
+            updateParentCameraStateAsync(targetCameraState)
+            lastAppliedCameraState = targetCameraState
+            mapView.camera.fly(to: cameraOptions, duration: 1.0)
+            lastHandledLocationRecenterToken = parent.locationRecenterToken
+        }
+
+        private func applyInitialLocationIfNeeded(on mapView: MapView) {
+            guard !hasCenteredOnInitialLocation else { return }
+            guard parent.selectedPOI == nil else { return }
+            guard let currentLocation = parent.currentLocation else { return }
+
+            let targetCameraState = MapCameraState(
+                latitude: currentLocation.coordinate.latitude,
+                longitude: currentLocation.coordinate.longitude,
+                zoom: 14.5,
+                bearing: 0,
+                pitch: parent.sceneMode.cameraPitch
+            )
+
+            let cameraOptions = CameraOptions(
+                center: targetCameraState.centerCoordinate,
+                zoom: targetCameraState.zoom,
+                bearing: targetCameraState.bearing,
+                pitch: targetCameraState.pitch
+            )
+
+            updateParentCameraStateAsync(targetCameraState)
+            lastAppliedCameraState = targetCameraState
+            mapView.mapboxMap.setCamera(to: cameraOptions)
+            hasCenteredOnInitialLocation = true
+        }
+
+        private func updateParentCameraStateAsync(_ cameraState: MapCameraState) {
+            DispatchQueue.main.async { [weak self] in
+                guard let self else { return }
+                guard self.parent.cameraState != cameraState else { return }
+                self.parent.cameraState = cameraState
+            }
         }
 
         private func applySceneModeIfNeeded(on mapView: MapView) {
@@ -402,6 +481,25 @@ struct MapboxMapView: UIViewRepresentable {
         private func refreshTrack() {
             guard let mapView = mapView else { return }
             trackOverlayManager.update(trackCoordinates: parent.currentTrackPoints, on: mapView)
+        }
+
+        private func refreshCurrentLocationAnnotation() {
+            guard let manager = currentLocationAnnotationManager else { return }
+
+            guard let currentLocation = parent.currentLocation else {
+                manager.annotations = []
+                return
+            }
+
+            var annotation = CircleAnnotation(centerCoordinate: currentLocation.coordinate)
+            annotation.circleRadius = 9
+            annotation.circleColor = StyleColor(UIColor.systemBlue)
+            annotation.circleOpacity = 0.95
+            annotation.circleStrokeColor = StyleColor(UIColor.white)
+            annotation.circleStrokeWidth = 4
+            annotation.userInfo = ["kind": "currentLocation"]
+
+            manager.annotations = [annotation]
         }
 
         private func makeMarkerImage(category: POICategory, selected: Bool) -> UIImage {
