@@ -2,10 +2,7 @@ import SwiftUI
 
 struct TrackListView: View {
     @ObservedObject private var trackService = TrackRecordingService.shared
-    
-    @State private var showingShareSheet = false
-    @State private var shareURL: URL?
-    
+
     // 自定义格式化
     private let dateFormatter: DateFormatter = {
         let df = DateFormatter()
@@ -15,54 +12,53 @@ struct TrackListView: View {
     }()
     
     var body: some View {
-        NavigationView {
-            List {
-                if trackService.historyRecords.isEmpty {
-                    Text("暂无轨迹记录")
-                        .foregroundColor(.secondary)
-                        .frame(maxWidth: .infinity, alignment: .center)
-                        .padding(.top, 40)
+        List {
+            if trackService.historyRecords.isEmpty {
+                Text("暂无轨迹记录")
+                    .foregroundColor(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .padding(.top, 40)
+                    
+            } else {
+                ForEach(trackService.historyRecords) { record in
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(record.name)
+                            .font(.headline)
                         
-                } else {
-                    ForEach(trackService.historyRecords) { record in
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text(record.name)
-                                .font(.headline)
-                            
-                            HStack {
-                                Label("\(String(format: "%.2f", record.totalDistance / 1000)) km", systemImage: "figure.walk")
-                                Spacer()
-                                Label(formatDuration(record.totalDuration), systemImage: "clock")
-                            }
-                            .font(.subheadline)
-                            .foregroundColor(.secondary)
-                            
-                            Text(dateFormatter.string(from: record.startTime))
-                                .font(.caption2)
-                                .foregroundColor(.gray)
+                        HStack {
+                            Label("\(String(format: "%.2f", record.totalDistance / 1000)) km", systemImage: "figure.walk")
+                            Spacer()
+                            Label(formatDuration(record.totalDuration), systemImage: "clock")
                         }
-                        .padding(.vertical, 4)
-                        .contextMenu {
-                            Button {
-                                if let url = trackService.generateGPX(for: record) {
-                                    presentShareSheet(url: url)
-                                }
-                            } label: {
-                                Label("导出 GPX", systemImage: "square.and.arrow.up")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                        
+                        Text(dateFormatter.string(from: record.startTime))
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.vertical, 4)
+                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                        Button {
+                            if let url = trackService.generateGPX(for: record) {
+                                presentShareSheet(url: url)
                             }
-                            
-                            Button {
-                                trackService.deleteRecord(record)
-                            } label: {
-                                Label("删除", systemImage: "trash")
-                                    .foregroundColor(.red)
-                            }
+                        } label: {
+                            Label("导出", systemImage: "square.and.arrow.up")
+                        }
+                        .tint(.blue)
+                        
+                        Button(role: .destructive) {
+                            trackService.deleteRecord(record)
+                        } label: {
+                            Label("删除", systemImage: "trash")
                         }
                     }
                 }
             }
-            .navigationTitle("我的轨迹")
         }
+        .navigationTitle("我的轨迹")
+        .navigationBarTitleDisplayMode(.inline)
     }
     
     private func formatDuration(_ interval: TimeInterval) -> String {

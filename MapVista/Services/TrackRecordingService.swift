@@ -43,32 +43,63 @@ public final class TrackRecordingService: TrackRecordingProviding {
     
     #if DEBUG
     private func injectMockData() {
-        var points: [TrackPoint] = []
-        let baseLocation = CLLocationCoordinate2D(latitude: 39.9042, longitude: 116.4074) // 北京
         let now = Date()
-        
-        for i in 0..<50 {
-            let offset = Double(i) * 0.0001
-            let point = TrackPoint(
-                latitude: baseLocation.latitude + offset,
-                longitude: baseLocation.longitude + offset,
-                altitude: 50.0 + Double.random(in: -5...5),
-                timestamp: now.addingTimeInterval(Double(i) * 10),
-                speed: 1.5 + Double.random(in: -0.5...0.5),
-                course: 45.0
+
+        let cities: [(name: String, coordinate: CLLocationCoordinate2D)] = [
+            ("北京", CLLocationCoordinate2D(latitude: 39.9042, longitude: 116.4074)),
+            ("上海", CLLocationCoordinate2D(latitude: 31.2304, longitude: 121.4737)),
+            ("广州", CLLocationCoordinate2D(latitude: 23.1291, longitude: 113.2644)),
+            ("深圳", CLLocationCoordinate2D(latitude: 22.5431, longitude: 114.0579)),
+            ("杭州", CLLocationCoordinate2D(latitude: 30.2741, longitude: 120.1551)),
+            ("南京", CLLocationCoordinate2D(latitude: 32.0603, longitude: 118.7969)),
+            ("苏州", CLLocationCoordinate2D(latitude: 31.2989, longitude: 120.5853)),
+            ("成都", CLLocationCoordinate2D(latitude: 30.5728, longitude: 104.0668)),
+            ("武汉", CLLocationCoordinate2D(latitude: 30.5928, longitude: 114.3055)),
+            ("西安", CLLocationCoordinate2D(latitude: 34.3416, longitude: 108.9398)),
+            ("重庆", CLLocationCoordinate2D(latitude: 29.5630, longitude: 106.5516)),
+            ("天津", CLLocationCoordinate2D(latitude: 39.3434, longitude: 117.3616)),
+            ("青岛", CLLocationCoordinate2D(latitude: 36.0671, longitude: 120.3826)),
+            ("长沙", CLLocationCoordinate2D(latitude: 28.2282, longitude: 112.9388)),
+            ("厦门", CLLocationCoordinate2D(latitude: 24.4798, longitude: 118.0894)),
+            ("福州", CLLocationCoordinate2D(latitude: 26.0745, longitude: 119.2965)),
+            ("大连", CLLocationCoordinate2D(latitude: 38.9140, longitude: 121.6147)),
+            ("昆明", CLLocationCoordinate2D(latitude: 25.0389, longitude: 102.7183)),
+            ("哈尔滨", CLLocationCoordinate2D(latitude: 45.8038, longitude: 126.5349)),
+            ("郑州", CLLocationCoordinate2D(latitude: 34.7473, longitude: 113.6249))
+        ]
+
+        historyRecords.removeAll()
+
+        for (index, city) in cities.enumerated() {
+            let startTime = now.addingTimeInterval(TimeInterval(-index * 3600))
+            var points: [TrackPoint] = []
+
+            for step in 0..<24 {
+                let progress = Double(step)
+                let latOffset = sin(progress / 5.0) * 0.0015 + Double(step) * 0.00006
+                let lonOffset = cos(progress / 4.0) * 0.0015 + Double(step) * 0.00005
+                let point = TrackPoint(
+                    latitude: city.coordinate.latitude + latOffset,
+                    longitude: city.coordinate.longitude + lonOffset,
+                    altitude: 20.0 + Double.random(in: -8...18),
+                    timestamp: startTime.addingTimeInterval(progress * 12),
+                    speed: 1.2 + Double.random(in: 0...2.8),
+                    course: Double((index * 17 + step * 11) % 360)
+                )
+                points.append(point)
+            }
+
+            let mockRecord = TrackRecord(
+                name: "模拟调试轨迹-\(city.name)",
+                startTime: startTime,
+                endTime: startTime.addingTimeInterval(24 * 12),
+                points: points,
+                totalDistance: Double.random(in: 850...4200)
             )
-            points.append(point)
+
+            historyRecords.append(mockRecord)
         }
-        
-        let mockRecord = TrackRecord(
-            name: "模拟调试轨迹-天安门探索",
-            startTime: now,
-            endTime: now.addingTimeInterval(500),
-            points: points,
-            totalDistance: 1200.5 // 米
-        )
-        
-        historyRecords.append(mockRecord)
+
         saveHistory()
     }
     #endif
